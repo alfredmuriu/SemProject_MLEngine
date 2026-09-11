@@ -1,26 +1,22 @@
 # SemProject_MLEngine
 
-ICS 3202: Artificial Intelligence — Semester Project, ML Engine.
+ICS 3202 Artificial Intelligence semester project - ML engine for a poultry farm
+management ERP.
 
-**Project:** An Integrated Enterprise Resource Planning System for Poultry Farm Management
+## Deliverable 1
 
-## Deliverable 1 — Dataset Exploration
+`EggProducingChickens_Exploration.ipynb` has the dataset discovery part and the
+exploration questions from the brief (rows/columns, datatypes, missing values,
+and the df_sample slice).
 
-[`EggProducingChickens_Exploration.ipynb`](EggProducingChickens_Exploration.ipynb)
+Dataset used: [Egg Producing Chickens](https://www.kaggle.com/datasets/phuzoman/egg-producing-chickens)
+on Kaggle (`phuzoman/egg-producing-chickens`). It's 1,000 daily records per bird -
+feed intake, age, weight, breed, sunlight exposure, and eggs laid that day.
 
-Dataset: [Egg Producing Chickens](https://www.kaggle.com/datasets/phuzoman/egg-producing-chickens)
-(Kaggle, `phuzoman/egg-producing-chickens`) — 1,000 daily observations across chicken
-breeds, recording physical attributes, feed intake, sunlight exposure, and eggs laid
-per day.
+The output variable we're going after is `EggsPerDay`, since that's what the
+ERP's production tracking and feed management modules need to predict.
 
-**Expected output variable:** `EggsPerDay` — daily egg yield per bird, feeding the
-ERP's Production Tracking and Feed Management modules.
+### How to run it
 
-The notebook covers dataset discovery across five candidate sources, the output
-variable each would support, and the required exploration questions (a–d).
-
-### Running it
-
-Open the notebook in Google Colab. The first cell prompts for a `kaggle.json` API
-token (Kaggle → Settings → Create New API Token) and downloads the dataset.
-Run the cells in order, top to bottom.
+Open it in Colab, drop in a `kaggle.json` (get one from Kaggle account settings)
+when the first cell asks for it, then run the cells top to bottom.
