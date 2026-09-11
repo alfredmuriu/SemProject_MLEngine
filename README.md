@@ -6,7 +6,7 @@ ICS 3202: Artificial Intelligence — Semester Project, ML Engine.
 
 ## Deliverable 1 — Dataset Exploration
 
-[`Egg_Producing_Chickens_Exploration.ipynb`](Egg_Producing_Chickens_Exploration.ipynb)
+[`EggProducingChickens_Exploration.ipynb`](EggProducingChickens_Exploration.ipynb)
 
 Dataset: [Egg Producing Chickens](https://www.kaggle.com/datasets/phuzoman/egg-producing-chickens)
 (Kaggle, `phuzoman/egg-producing-chickens`) — 1,000 daily observations across chicken
