@@ -48,7 +48,8 @@ What it found:
 | `model.py` | the encoding + random forest pipeline, cross-validation, saving/loading |
 | `train.py` | trains and saves `models/egg_model.joblib` |
 | `agent.py` | `FlockAgent` - reviews a day of flock records and recommends actions |
-| `api.py` | FastAPI service the ERP calls |
+| `api.py` | FastAPI service the ERP calls - also serves the web app |
+| `web/` | FlockWise, the web front end (plain HTML/CSS/JS, no build step) |
 
 `FlockAgent` is a model-based reflex agent: it uses the trained model to work
 out what each bird *should* have laid today and in 30 days' time, compares
@@ -62,10 +63,31 @@ flock-wide shortfalls no single bird explains.
 pip install -r requirements.txt
 python -m ml_engine.train                             # train + save the model
 python -m ml_engine.agent examples/flock_today.json   # review a sample day
-uvicorn ml_engine.api:app --reload                    # API, try it at http://127.0.0.1:8000/docs
+uvicorn ml_engine.api:app --reload                    # web app at http://127.0.0.1:8000, API docs at /docs
 pytest                                                # tests (no dataset download needed)
 ```
 
 API endpoints: `POST /predict` (expected eggs per bird), `POST /flock/review`
-(the agent's full report), `GET /health`. Each takes a list of bird records -
-only `GallusID` and `Age` are required, plus `EggsCollected` for the review.
+(the agent's full report), `GET /model` (how the model was trained and scored),
+`GET /sample-flock`, `GET /health`. The POST endpoints take a list of bird
+records - only `GallusID` and `Age` are required, plus `EggsCollected` for the
+review.
+
+### The web app (FlockWise)
+
+Running the API also serves FlockWise at `/`. It uses the same design
+language as the ERPs (SiteLedger, Benchmark, MillFlow) with its own brand
+colour, and has three pages:
+
+- **Flock review** - enter each bird's age, feed and eggs collected (or load
+  the sample flock), run the agent, and get its actions, the flock totals and
+  a bird-by-bird table of expected eggs today and in 30 days
+- **Predict a bird** - a form for one bird; anything left blank is filled by
+  the model
+- **The model** - the cross-validation scores, a chart of expected eggs
+  against age, and the caveats about what the scores mean
+
+Open `http://127.0.0.1:8000/?demo` to load the sample flock and run the review
+straight away, which is handy for a presentation. The page also works in a
+phone's browser on the same Wi-Fi: start the server with `--host 0.0.0.0` and
+open the laptop's IP address on port 8000.
