@@ -127,3 +127,27 @@ def test_api_review(agent):
         assert client.post("/flock/review", json=[{"GallusID": "a"}]).status_code == 422
     finally:
         api.app.dependency_overrides.clear()
+
+
+def test_web_app_and_its_endpoints(agent):
+    api.app.dependency_overrides[api.get_bundle] = lambda: {
+        "pipeline": agent.pipeline,
+        "metrics": {"r2": 0.99},
+        "n_birds": 200,
+        "sklearn_version": "test",
+    }
+    try:
+        client = TestClient(api.app)
+        page = client.get("/")
+        assert page.status_code == 200 and "FlockWise" in page.text
+        assert client.get("/static/app.js").status_code == 200
+
+        info = client.get("/model").json()
+        assert info["model"] == "RandomForestRegressor" and info["n_birds"] == 200
+
+        sample = client.get("/sample-flock").json()
+        assert len(sample) >= 1 and all("Age" in bird for bird in sample)
+        # the web app sends the sample flock straight to the review endpoint
+        assert client.post("/flock/review", json=sample).status_code == 200
+    finally:
+        api.app.dependency_overrides.clear()
