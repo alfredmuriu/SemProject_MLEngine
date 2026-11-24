@@ -66,9 +66,11 @@ def compare(table):
     return results, predictions
 
 
-def choose(results):
-    """The candidate with the lowest held-out MAE."""
-    return min(CANDIDATES, key=lambda name: results[name]["mae"])
+# The engine uses a random forest for every horizon. It scores best at 4 and
+# 8 weeks ahead and is within 0.03 points of gradient boosting at 1 week, so
+# one model type keeps the engine simple. The other candidates are still
+# scored, as the evidence for that choice.
+CHOSEN = "Random forest"
 
 
 def save(bundle, path):

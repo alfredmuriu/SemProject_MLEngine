@@ -34,7 +34,8 @@ columns, datatypes, missing values, the `df_sample` slice). It also covers:
 ## Deliverable 2: `LayingRate_Model.ipynb`
 
 This notebook builds the inputs, compares three models with three simple rules a farmer could
-use, checks that the model really learned, and saves the chosen models. Every score comes from
+use, checks that the model really learned, and saves the chosen model: a **random forest** for
+every horizon. Every score comes from
 **flocks the model never saw**: it trains on 8 flocks and tests on the 9th, repeated for each
 flock.
 
@@ -42,13 +43,13 @@ Mean absolute error in laying-rate points on unseen flocks (lower is better):
 
 | Method | 1 week ahead | 4 weeks ahead | 8 weeks ahead |
 |---|---|---|---|
-| **Chosen model** | **2.47** (gradient boosting) | **2.83** (random forest) | **2.91** (random forest) |
+| **Random forest (used)** | **2.50** | **2.83** | **2.91** |
 | Same as this week (rule) | 3.50 | 6.89 | 8.38 |
 | Breed standard (rule) | 5.36 | 3.44 | 3.14 |
 | Standard + this week's gap (rule) | 3.06 | 5.73 | 6.66 |
 
 What the notebook found:
-- **The best model beats every rule at every horizon.** The margin is about 18–19% at 1 and 4
+- **The random forest beats every rule at every horizon.** The margin is about 18% at 1 and 4
   weeks, and under 10% at 8 weeks, where the forecast leans on the breed curve.
 - **The model learned something real.** Its error on an unseen flock falls steadily as it is
   trained on more flocks. It needs about 5 flocks to beat the breed guide.
@@ -67,7 +68,7 @@ What the notebook found:
 |---|---|
 | `data.py` | loads the dataset, turns it into weekly records per flock, builds the inputs (only from the past) |
 | `model.py` | the candidate models, the baseline rules, leave-one-flock-out scoring, saving/loading |
-| `train.py` | scores every candidate, picks the best per horizon, saves `models/flock_forecaster.joblib` |
+| `train.py` | scores every candidate and rule (the evidence), trains a random forest per horizon, saves `models/flock_forecaster.joblib` |
 | `agent.py` | `FlockAgent`: reviews a flock's weekly records and recommends actions |
 | `api.py` | FastAPI service the ERP calls; it also serves the web app |
 | `web/` | FlockWise, the web front end (plain HTML/CSS/JS, no build step) |

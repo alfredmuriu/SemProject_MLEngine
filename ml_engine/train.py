@@ -1,4 +1,6 @@
-"""Train one laying-rate forecaster per horizon and save them for the agent and API.
+"""Train a random-forest laying-rate forecaster per horizon and save them for the agent and API.
+
+Every candidate model and baseline rule is scored too, as evidence for the choice.
 
     python -m ml_engine.train
     python -m ml_engine.train --data path/to/DATA_Repository.txt
@@ -27,7 +29,7 @@ def main(argv=None):
     for horizon in HORIZONS:
         table = training_table(flocks, horizon, curve)
         results, _ = model.compare(table)
-        best = model.choose(results)
+        best = model.CHOSEN
         print(f"\n{horizon} week(s) ahead - {len(table)} forecasts, scored leaving one flock out:")
         for name, r in sorted(results.items(), key=lambda kv: kv[1]["mae"]):
             mark = "  <- chosen" if name == best else ""
