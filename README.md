@@ -107,11 +107,18 @@ weeks, oldest first, each with `age_weeks`, `hens`, `eggs`, `feed_kg` and option
 
 ### The web app (FlockWise)
 
-Running the API also serves FlockWise at `/`, in the same design language as the ERPs:
-- **Flock review:** enter the weekly records (or load the sample flock) and run the agent. You
-  get this week against the standard, forecasts with a likely range, a chart, the expected eggs
-  next week and the recommended actions.
-- **The model:** every method's error on unseen flocks, and what the scores do and don't mean.
+Running the API also serves FlockWise at `/`: one page, in the same design language as the ERPs.
+Fill in this week's numbers for a flock and press **Show forecast**: age, hens alive, feed used
+by the whole flock (kg), deaths, and eggs collected this week and the two weeks before. You can also load the sample flock.
+An optional table below holds the full weekly history. You get:
+- this week's laying rate against the standard;
+- the 4-week forecast with its likely range;
+- the eggs expected next week;
+- a chart of the flock against the breed curve, with labelled forecasts;
+- what to do.
+
+A footnote gives the model's accuracy on unseen flocks. The full comparison is in
+`LayingRate_Model.ipynb`.
 
 Open `http://127.0.0.1:8000/?demo` to load the sample flock and run the review straight away.
 The sample is real: flock G2-F2's first 16 weeks. That flock was in the training data, so the

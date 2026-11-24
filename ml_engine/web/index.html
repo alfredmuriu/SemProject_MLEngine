@@ -13,46 +13,14 @@
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <div class="shell">
-    <aside class="sidebar-desktop" data-sidebar></aside>
+  <header class="topbar">
+    <span class="brand-mark" data-icon="bird"></span>
+    <span class="brand-name">FlockWise</span>
+    <span class="brand-sub">Poultry ERP · ML engine</span>
+    <span class="model-chip" data-model-chip><span class="pip"></span><span data-model-text>Checking model…</span></span>
+  </header>
 
-    <div class="mobile-bar">
-      <button type="button" class="icon-btn" data-open-drawer aria-label="Open navigation" data-icon="menu"></button>
-      <span class="mobile-title"><span class="brand-mark" data-icon="bird"></span>FlockWise</span>
-    </div>
-
-    <div class="drawer" data-drawer hidden>
-      <div class="drawer-backdrop" data-close-drawer></div>
-      <div class="drawer-panel">
-        <button type="button" class="icon-btn drawer-close" data-close-drawer aria-label="Close navigation" data-icon="x"></button>
-        <div data-sidebar style="height: 100%"></div>
-      </div>
-    </div>
-
-    <main>
-      <div class="container" id="view"></div>
-    </main>
-  </div>
-
-  <template id="sidebar-template">
-    <div class="sidebar">
-      <a href="#/review" class="brand">
-        <span class="brand-mark" data-icon="bird"></span>
-        <span>
-          <span class="brand-name">FlockWise</span>
-          <span class="brand-sub">Poultry ERP · ML engine</span>
-        </span>
-      </a>
-      <nav class="nav">
-        <a href="#/review" data-route="review"><span class="pip"></span><span data-icon="clipboard"></span>Flock review</a>
-        <a href="#/model" data-route="model"><span class="pip"></span><span data-icon="chart"></span>The model</a>
-      </nav>
-      <div class="sidebar-foot">
-        <div class="model-chip" data-model-chip><span class="pip"></span><span data-model-text>Checking model…</span></div>
-      </div>
-      <div class="wordmark" aria-hidden="true">flockwise</div>
-    </div>
-  </template>
+  <main class="container" id="app"></main>
 
   <script src="/static/app.js"></script>
 </body>
