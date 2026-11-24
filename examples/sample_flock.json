@@ -1,0 +1,22 @@
+{
+  "flock_id": "G2-F2",
+  "note": "Real weekly records of flock G2-F2 (Lohmann Brown, Colombia, 2010), weeks 19-34, from the training dataset (Cabezas-Garcia et al., 2024, CC BY 4.0).",
+  "weeks": [
+    {"age_weeks": 19, "hens": 1548, "eggs": 8, "feed_kg": 976.79, "deaths": 0},
+    {"age_weeks": 20, "hens": 1547, "eggs": 35, "feed_kg": 1083.4, "deaths": 1},
+    {"age_weeks": 21, "hens": 1546, "eggs": 204, "feed_kg": 1174.4, "deaths": 1},
+    {"age_weeks": 22, "hens": 1546, "eggs": 828, "feed_kg": 1174.19, "deaths": 0},
+    {"age_weeks": 23, "hens": 1546, "eggs": 2635, "feed_kg": 1222.89, "deaths": 0},
+    {"age_weeks": 24, "hens": 1544, "eggs": 5168, "feed_kg": 1232.91, "deaths": 2},
+    {"age_weeks": 25, "hens": 1544, "eggs": 6796, "feed_kg": 1242.92, "deaths": 0},
+    {"age_weeks": 26, "hens": 1541, "eggs": 8467, "feed_kg": 1253.61, "deaths": 3},
+    {"age_weeks": 27, "hens": 1538, "eggs": 9734, "feed_kg": 1261.61, "deaths": 3},
+    {"age_weeks": 28, "hens": 1535, "eggs": 9820, "feed_kg": 1270.39, "deaths": 3},
+    {"age_weeks": 29, "hens": 1532, "eggs": 9901, "feed_kg": 1267.91, "deaths": 3},
+    {"age_weeks": 30, "hens": 1531, "eggs": 10168, "feed_kg": 1286.64, "deaths": 1},
+    {"age_weeks": 31, "hens": 1527, "eggs": 10046, "feed_kg": 1285.8, "deaths": 4},
+    {"age_weeks": 32, "hens": 1519, "eggs": 9698, "feed_kg": 1279.92, "deaths": 8},
+    {"age_weeks": 33, "hens": 1518, "eggs": 9523, "feed_kg": 1275.24, "deaths": 1},
+    {"age_weeks": 34, "hens": 1514, "eggs": 7790, "feed_kg": 1274.4, "deaths": 4}
+  ]
+}

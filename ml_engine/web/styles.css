@@ -325,6 +325,8 @@ main { min-width: 0; padding: 40px 20px; animation: fade-in 0.15s ease-out; }
 .card-header .sub { margin-top: 4px; font-size: 12px; color: var(--ink-500); }
 
 .grid { display: grid; gap: 16px; }
+/* let grid cells shrink below their content's width (wide tables scroll instead) */
+.grid > * { min-width: 0; }
 .stack > * + * { margin-top: 16px; }
 
 .stat-grid { display: grid; gap: 16px; }
@@ -502,6 +504,20 @@ tbody tr:hover { background: rgb(246 247 249 / 0.7); }
 .chart .gap-label { fill: var(--ink-500); font-size: 11px; font-family: var(--font-sans); }
 .chart .crosshair { stroke: var(--ink-300); stroke-width: 1; stroke-dasharray: 3 3; }
 .chart .marker { fill: var(--brand-600); stroke: #fff; stroke-width: 2; }
+.chart .standard { fill: none; stroke: var(--ink-400); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.chart .forecast-line { fill: none; stroke: var(--brand-600); stroke-width: 1.5; stroke-dasharray: 2 4; stroke-linecap: round; }
+.chart .whisker { stroke: var(--brand-400); stroke-width: 2; stroke-linecap: round; }
+.chart .forecast-dot { fill: #fff; stroke: var(--brand-600); stroke-width: 2; }
+
+/* key for the review chart's three series */
+.legend { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px 24px 0; font-size: 12px; color: var(--ink-500); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.key { display: inline-block; width: 18px; height: 0; border-top: 2px solid var(--brand-600); }
+.key-standard { border-top: 2px dashed var(--ink-400); }
+.key-forecast { width: 10px; height: 10px; border: 2px solid var(--brand-600); border-radius: 50%; }
+
+.cell-best { background: var(--brand-50); color: var(--brand-800); font-weight: 600; }
+.text-negative { color: var(--red-600); }
 
 .tooltip {
   position: absolute;

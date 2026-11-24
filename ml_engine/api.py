@@ -1,10 +1,10 @@
-"""HTTP service the ERP calls to get predictions and flock reviews.
+"""HTTP service the ERP calls to get laying-rate forecasts and flock reviews.
 
     uvicorn ml_engine.api:app --reload
     then open http://127.0.0.1:8000 for the FlockWise web app,
     or http://127.0.0.1:8000/docs to try the endpoints directly
 
-Set MODEL_PATH to use a model somewhere other than models/egg_model.joblib.
+Set MODEL_PATH to use a model somewhere other than models/flock_forecaster.joblib.
 """
 import json
 import os
@@ -19,33 +19,40 @@ from pydantic import BaseModel, Field
 
 from . import model
 from .agent import FlockAgent
-from .data import FEATURES
+from .data import MIN_WEEKS
 from .train import DEFAULT_MODEL_PATH
 
 WEB_DIR = Path(__file__).parent / "web"
-SAMPLE_FLOCK = Path(__file__).parent.parent / "examples" / "flock_today.json"
+SAMPLE_FLOCK = Path(__file__).parent.parent / "examples" / "sample_flock.json"
+DATA_SOURCE = {
+    "citation": (
+        "Cabezas-Garcia, Rodriguez-Aguilar & Betancourt Lopez (2024). Evaluation of the historical "
+        "performance of Lohmann Brown-Classic laying hens maintained on a conventional cage system "
+        "in Colombia. Mendeley Data."
+    ),
+    "url": "https://data.mendeley.com/datasets/t2gzbht99m",
+    "licence": "CC BY 4.0",
+}
 
-app = FastAPI(title="Poultry ERP - ML Engine", version="0.2.0")
+app = FastAPI(title="Poultry ERP - ML Engine", version="0.3.0")
 app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
 
 
-class BirdRecord(BaseModel):
-    """One bird on one day. Only GallusID and Age are required - the model
-    fills anything else that is missing."""
+class WeekRecord(BaseModel):
+    """One week of a flock's records."""
 
-    GallusID: str
-    Age: float = Field(..., ge=0, description="age in days")
-    GallusWeight: Optional[float] = None
-    GallusEggWeight: Optional[float] = None
-    AmountOfFeed: Optional[float] = Field(None, description="feed given today, grams")
-    SunLightExposure: Optional[float] = Field(None, description="hours of light")
-    GallusBreed: Optional[str] = None
-    GallusEggColor: Optional[str] = None
-    GallusCombType: Optional[str] = None
-    GallusLegShanksColor: Optional[str] = None
-    GallusBeakColor: Optional[str] = None
-    GallusPlumage: Optional[str] = None
-    EggsCollected: Optional[int] = Field(None, ge=0, description="actual eggs collected today")
+    age_weeks: int = Field(..., ge=1, description="age of the flock that week, in weeks")
+    hens: int = Field(..., gt=0, description="hens alive at the end of the week")
+    eggs: int = Field(..., ge=0, description="eggs collected during the week")
+    feed_kg: float = Field(..., ge=0, description="feed used during the week, kg")
+    deaths: Optional[int] = Field(
+        None, ge=0, description="birds that died or were culled; worked out from the drop in hens if left out"
+    )
+
+
+class Flock(BaseModel):
+    flock_id: Optional[str] = None
+    weeks: List[WeekRecord] = Field(..., description=f"consecutive weeks, oldest first, at least {MIN_WEEKS}")
 
 
 @lru_cache(maxsize=1)
@@ -59,7 +66,24 @@ def get_bundle():
 
 
 def get_agent(bundle: dict = Depends(get_bundle)):
-    return FlockAgent(bundle["pipeline"])
+    return FlockAgent(bundle)
+
+
+def _weeks(flock: Flock):
+    weeks = [w.model_dump() for w in flock.weeks]
+    # a missing deaths value is worked out from the drop in hens, but only
+    # when the whole column is missing - a half-filled column would mix the two
+    if any(w["deaths"] is None for w in weeks):
+        for w in weeks:
+            w.pop("deaths")
+    return weeks
+
+
+def _run(call):
+    try:
+        return call()
+    except ValueError as err:  # records a forecast can't be built from
+        raise HTTPException(422, str(err))
 
 
 @app.get("/", include_in_schema=False)
@@ -74,36 +98,42 @@ def health():
 
 @app.get("/model")
 def model_info(bundle: dict = Depends(get_bundle)):
-    """How the loaded model was trained and evaluated."""
+    """How the loaded models were trained and how they scored on unseen flocks."""
     return {
-        "model": type(bundle["pipeline"].named_steps["model"]).__name__,
-        "n_birds": bundle.get("n_birds"),
-        "metrics": bundle.get("metrics", {}),
-        "sklearn_version": bundle.get("sklearn_version"),
-        "features": FEATURES,
+        "n_flocks": bundle["n_flocks"],
+        "n_weeks": bundle["n_weeks"],
+        "features": bundle["features"],
+        "sklearn_version": bundle["sklearn_version"],
+        "data_source": DATA_SOURCE,
+        "horizons": [
+            {
+                "horizon_weeks": h,
+                "model": entry["model_name"],
+                "n_forecasts": entry["n_rows"],
+                "results": entry["results"],
+            }
+            for h, entry in sorted(bundle["horizons"].items())
+        ],
     }
+
+
+@app.get("/standard-curve")
+def standard_curve(bundle: dict = Depends(get_bundle)):
+    """The breed's target laying rate (% per day) by week of age."""
+    return [{"age_weeks": a, "standard": v} for a, v in sorted(bundle["standard_curve"].items())]
 
 
 @app.get("/sample-flock")
 def sample_flock():
-    """The demo flock in examples/, so the web app has something to load."""
+    """A real flock's first 16 weeks, so the web app has something to load."""
     return json.loads(SAMPLE_FLOCK.read_text(encoding="utf-8"))
 
 
-@app.post("/predict")
-def predict(records: List[BirdRecord], agent: FlockAgent = Depends(get_agent)):
-    rows = [r.model_dump() for r in records]
-    expected = agent.expected_eggs(rows) if rows else []
-    return {
-        "predictions": [
-            {"GallusID": r["GallusID"], "expected_eggs": round(float(e), 3)}
-            for r, e in zip(rows, expected)
-        ]
-    }
+@app.post("/forecast")
+def forecast(flock: Flock, agent: FlockAgent = Depends(get_agent)):
+    return {"flock_id": flock.flock_id, "forecasts": _run(lambda: agent.forecast(_weeks(flock)))}
 
 
 @app.post("/flock/review")
-def review(records: List[BirdRecord], agent: FlockAgent = Depends(get_agent)):
-    if not records:
-        raise HTTPException(422, "Send at least one bird record.")
-    return agent.review_day(r.model_dump() for r in records)
+def review(flock: Flock, agent: FlockAgent = Depends(get_agent)):
+    return _run(lambda: agent.review(_weeks(flock), flock.flock_id))

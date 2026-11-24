@@ -4,5 +4,7 @@
   {"GallusID": "Hen-03", "GallusBreed": "Marans", "Age": 945, "GallusWeight": 2600, "GallusEggWeight": 39.8, "AmountOfFeed": 115, "SunLightExposure": 8, "GallusEggColor": "Brown", "GallusCombType": "Single", "GallusPlumage": "Blue Copper", "EggsCollected": 1},
   {"GallusID": "Hen-04", "GallusBreed": "Marans", "Age": 980, "GallusWeight": 1900, "GallusEggWeight": 36.2, "AmountOfFeed": 124, "SunLightExposure": 7, "GallusEggColor": "Brown", "GallusCombType": "Single", "GallusPlumage": "Splash Copper", "EggsCollected": 0},
   {"GallusID": "Hen-05", "GallusBreed": "Ameraucana", "Age": 300, "GallusWeight": 1950, "GallusEggWeight": 51.3, "AmountOfFeed": 110, "SunLightExposure": 10, "GallusEggColor": "Light Blue", "GallusCombType": "Pea", "GallusPlumage": "Black", "EggsCollected": 1},
-  {"GallusID": "Hen-06", "GallusBreed": "Ameraucana", "Age": 512, "AmountOfFeed": 112, "EggsCollected": 1}
+  {"GallusID": "Hen-06", "GallusBreed": "Ameraucana", "Age": 512, "AmountOfFeed": 112, "EggsCollected": 1},
+  {"GallusID": "Pullet-07", "GallusBreed": "Marans", "Age": 105, "GallusWeight": 1400, "AmountOfFeed": 80, "EggsCollected": 0},
+  {"GallusID": "Chick-08", "GallusBreed": "Marans", "Age": 30, "GallusWeight": 350, "AmountOfFeed": 35, "EggsCollected": 0}
 ]
