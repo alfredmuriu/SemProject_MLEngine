@@ -136,18 +136,19 @@ function submitForm() {
   if (v.age < 21 || v.age > 70) return showError('Flock age must be between 21 and 70 weeks - the ages the model was trained on.');
   if (v.hens <= 0) return showError('Hens alive must be more than 0.');
 
-  if (flock.weeks.length >= 3) {
-    // update the latest three weeks, renumbering every week so they stay consecutive
+  const latest = flock.weeks[flock.weeks.length - 1];
+  if (flock.weeks.length >= 3 && latest.age_weeks === v.age) {
+    // same flock, same week: update the latest three weeks and keep the earlier history
     const w = flock.weeks;
     const n = w.length;
-    w.forEach((week, i) => { week.age_weeks = v.age - (n - 1 - i); });
     Object.assign(w[n - 1], { hens: v.hens, feed_kg: v.feed, deaths: v.deaths ?? '', eggs: v.eggs0 });
     w[n - 2].eggs = v.eggs1;
     w[n - 3].eggs = v.eggs2;
-    // weeks before the first one can't have a negative age
-    flock.weeks = w.filter((week) => week.age_weeks >= 1);
   } else {
-    // a new flock: assume hens and feed were steady over the three weeks
+    // a different age means a different flock or week: start fresh from the form,
+    // rather than shifting old history to ages it never had (hens laying at 15 weeks).
+    // Hens and feed are assumed steady over the three weeks.
+    note = '';
     flock.weeks = [2, 1, 0].map((back) => ({
       age_weeks: v.age - back, hens: v.hens, feed_kg: v.feed,
       eggs: v[`eggs${back}`], deaths: v.deaths == null ? '' : back ? 0 : v.deaths,
@@ -200,7 +201,9 @@ function drawResults() {
   if (!review) { host.innerHTML = ''; return; }
   const { latest: l, forecasts, actions, flags, expected_eggs_next_week: eggs } = review;
   const ahead = forecasts.find((f) => f.horizon_weeks === 4) || forecasts[forecasts.length - 1];
-  const tone = (gap) => (gap == null ? '' : gap < -5 ? 'negative' : gap >= 0 ? 'positive' : '');
+  // when the agent says the records look wrong, nothing gets a good/bad colour
+  const suspect = flags.includes('check_records');
+  const tone = (gap) => (gap == null || suspect ? '' : gap < -5 ? 'negative' : gap >= 0 ? 'positive' : '');
   const vsStandard = (gap, std) => (std == null ? 'no breed standard at this age' : `${gap >= 0 ? '+' : '−'}${fmt(Math.abs(gap), 1)} points against the standard of ${pct(std)}`);
 
   host.innerHTML = `
@@ -214,7 +217,7 @@ function drawResults() {
         <div class="stat">
           <p class="micro">Forecast · week ${ahead ? ahead.age_weeks : '—'}</p>
           <p class="stat-value num ${ahead ? tone(ahead.gap) : ''}">${ahead ? pct(ahead.lay_rate) : '—'}</p>
-          <p class="stat-hint">${ahead ? `likely ${fmt(ahead.low, 1)}–${fmt(ahead.high, 1)}% · ${vsStandard(ahead.gap, ahead.standard)}` : 'past the ages the model was trained on'}</p>
+          <p class="stat-hint">${suspect ? 'unreliable - check the records first' : ahead ? `likely ${fmt(ahead.low, 1)}–${fmt(ahead.high, 1)}% · ${vsStandard(ahead.gap, ahead.standard)}` : 'past the ages the model was trained on'}</p>
         </div>
         <div class="stat">
           <p class="micro">Eggs expected next week</p>

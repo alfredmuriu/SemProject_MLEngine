@@ -191,3 +191,11 @@ def test_web_app_and_its_endpoints(client):
     info = client.get("/model").json()
     assert info["n_flocks"] == 6 and [h["horizon_weeks"] for h in info["horizons"]] == [1, 4, 8]
     assert client.get("/standard-curve").json()[0] == {"age_weeks": 19, "standard": CURVE[19]}
+
+
+def test_impossible_records_are_flagged_not_forecast(agent):
+    # a 21-week-old flock laying ~90% for weeks: far above what hens that age manage
+    weeks = [{"age_weeks": a, "hens": 1500, "eggs": 9400, "feed_kg": 1260.0, "deaths": 0} for a in (19, 20, 21)]
+    report = agent.review(weeks)
+    assert report["flags"] == ["check_records"]
+    assert report["actions"][0].startswith("Check the records")

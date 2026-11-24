@@ -32,6 +32,7 @@ class FlockAgent:
         mortality_alert_pct=0.5,
         feed_alert_kg_per_dozen=2.0,
         warning_horizon=4,
+        implausible_gap=20.0,
     ):
         self.bundle = bundle
         self.curve = bundle["standard_curve"]
@@ -45,6 +46,9 @@ class FlockAgent:
         self.feed_alert_kg_per_dozen = feed_alert_kg_per_dozen
         # the forecast the early warning is based on
         self.warning_horizon = warning_horizon
+        # laying more than this many points above the standard means the
+        # records are probably wrong
+        self.implausible_gap = implausible_gap
 
     @classmethod
     def from_file(cls, path=DEFAULT_MODEL_PATH, **settings):
@@ -109,7 +113,23 @@ class FlockAgent:
             None if next_week is None else int(round(next_week["lay_rate"] / 100 * 7 * latest["hens"]))
         )
 
-        flags = self._flags(latest, by_horizon.get(self.warning_horizon))
+        # Laying far above the breed standard for the age isn't something real
+        # flocks do (the most in the training data is 17.8 points above), so it
+        # almost always means a wrong age or egg count. Advice built on it would
+        # be confidently wrong, so the agent asks for the records to be checked.
+        recent = derived.tail(MIN_WEEKS)
+        too_high = recent[recent["gap"] > self.implausible_gap]
+        if not too_high.empty:
+            w = too_high.iloc[0]
+            flags = ["check_records"]
+            actions = [
+                f"Check the records: at {int(w['age_weeks'])} weeks the flock is recorded laying "
+                f"{w['lay_rate']:.1f}%, far above the {w['standard']:.1f}% hens of that age usually "
+                "manage. The age or the egg counts are probably wrong, so the forecast isn't reliable."
+            ]
+        else:
+            flags = self._flags(latest, by_horizon.get(self.warning_horizon))
+            actions = self._actions(flags, latest, by_horizon.get(self.warning_horizon))
         return {
             "flock_id": flock_id,
             "weeks_recorded": len(weeks),
@@ -117,7 +137,7 @@ class FlockAgent:
             "forecasts": forecasts,
             "expected_eggs_next_week": expected_eggs_next_week,
             "flags": flags,
-            "actions": self._actions(flags, latest, by_horizon.get(self.warning_horizon)),
+            "actions": actions,
             "history": [
                 {"age_weeks": int(r.age_weeks), "lay_rate": _r(r.lay_rate), "standard": _r(r.standard)}
                 for r in derived.itertuples()
