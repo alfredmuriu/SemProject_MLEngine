@@ -21,21 +21,21 @@ from those.
 The first version used the Kaggle *Egg Producing Chickens* dataset. Its target turned out to
 be decided by one rule: every hen older than about 950 days laid 0 eggs, and every younger
 hen laid 1. A model could only rediscover that rule. Three replacements were downloaded and
-tested before choosing this one (see the table in `Lohmann_Exploration.ipynb`). The old version
+tested before choosing this one (listed in `Lohmann_Exploration.ipynb`). The old version
 is kept in [archive/v1-egg-producing-chickens/](archive/v1-egg-producing-chickens/).
 
 ## Deliverable 1: `Lohmann_Exploration.ipynb`
 
-This notebook covers dataset discovery and the exploration questions from the brief (rows and
-columns, datatypes, missing values, the `df_sample` slice). It also covers:
-- which columns are raw records and which are calculated from them;
-- every flock's laying curve against the breed standard.
+This notebook covers the datasets considered, the exploration questions from the brief (rows and
+columns, datatypes, missing values, the `df_sample` slice), the data cleaning, and a chart of
+every flock's laying curve against the breed standard. The data before and after cleaning is
+also in `data/original_dataset.xlsx` and `data/cleaned_dataset.xlsx`.
 
 ## Deliverable 2: `LayingRate_Model.ipynb`
 
-This notebook builds the inputs, compares three models with three simple rules a farmer could
-use, checks that the model really learned, and saves the chosen model: a **random forest** for
-every horizon. Every score comes from
+This notebook builds the inputs, trains a **random forest** for each horizon, compares it with
+three simple rules a farmer could use, checks that it really learned, and saves it. Every score
+comes from
 **flocks the model never saw**: it trains on 8 flocks and tests on the 9th, repeated for each
 flock.
 
@@ -52,12 +52,7 @@ What the notebook found:
 - **The random forest beats every rule at every horizon.** The margin is about 18% at 1 and 4
   weeks, and under 10% at 8 weeks, where the forecast leans on the breed curve.
 - **The model learned something real.** Its error on an unseen flock falls steadily as it is
-  trained on more flocks. It needs about 5 flocks to beat the breed guide.
-- **It weighs its evidence differently at each horizon.** For next week it relies on the
-  flock's recent laying. For two months out it shifts to age and the breed curve.
-- **A random split would flatter it** (4-week MAE 2.62 against an honest 2.83), which is why
-  every score is by flock.
-- **The start of lay is the hardest part.** Errors double while flocks ramp up to their peak.
+  trained on more flocks, and beats the breed guide from about 5 flocks.
 - **Limitations.** All the data comes from one farm, one breed and one country, and there are
   only 9 flocks. The records also can't predict sudden dips from disease or stress. The engine
   should be retrained on local Kenyan records before anyone relies on it.
